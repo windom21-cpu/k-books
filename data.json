@@ -164,6 +164,21 @@
       "addedBy": "001",
       "note": "",
       "acquiredAt": "2026-05-03"
+    },
+    {
+      "id": "a3e8913e-fdc5-4c65-8c89-d4c5ae379b1e",
+      "series": "ジャンプコミックス",
+      "seriesYomi": "ジュジュツ カイセン",
+      "volume": 15,
+      "edition": "",
+      "title": "呪術廻戦 15",
+      "author": "芥見,下々,1992-",
+      "publisher": "集英社",
+      "isbn": "9784088825816",
+      "coverUrl": "",
+      "addedBy": "001",
+      "note": "",
+      "acquiredAt": "2026-05-03"
     }
   ]
 }
