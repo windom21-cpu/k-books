@@ -1,4 +1,4 @@
-import { getPAT, setPAT, getNick, setNick, config } from './core.js';
+import { getPAT, setPAT, getNick, setNick, config } from './core.js?v=0.9';
 
 const $ = id => document.getElementById(id);
 
