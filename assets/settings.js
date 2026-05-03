@@ -3,7 +3,7 @@ import {
   getNextInviteNum, setNextInviteNum, formatInviteNum,
   config, fetchData, commitMutation, normalize,
   startBarcodeScan, stopBarcodeScan, SCAN_FORMAT_QR_CODE
-} from './core.js?v=2.16';
+} from './core.js?v=2.17';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -78,6 +78,7 @@ let inviteScanner = null;
 $('inviteScanStart').addEventListener('click', async () => {
   $('inviteScanStart').disabled = true;
   $('inviteScanStop').disabled = false;
+  $('inviteReader').style.display = '';
   $('inviteScanStatus').textContent = 'カメラ起動中...';
   try {
     inviteScanner = await startBarcodeScan('inviteReader', async (raw) => {
@@ -112,6 +113,7 @@ $('inviteScanStart').addEventListener('click', async () => {
     $('inviteScanStatus').innerHTML = `<span class="error">${e.message}</span>`;
     $('inviteScanStart').disabled = false;
     $('inviteScanStop').disabled = true;
+    $('inviteReader').style.display = 'none';
   }
 });
 
@@ -120,6 +122,7 @@ async function stopInviteScan() {
   inviteScanner = null;
   $('inviteScanStart').disabled = false;
   $('inviteScanStop').disabled = true;
+  $('inviteReader').style.display = 'none';
 }
 $('inviteScanStop').addEventListener('click', stopInviteScan);
 window.addEventListener('beforeunload', stopInviteScan);
