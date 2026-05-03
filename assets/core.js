@@ -1,5 +1,5 @@
 const CFG = window.APP_CONFIG;
-console.log(`[zousyo] core.js loaded (${CFG.version})`);
+console.log(`[k-books] core.js loaded (${CFG.version})`);
 
 // タイトルバーにバージョン表示(キャッシュ有無を一目で判断するため)
 window.addEventListener('DOMContentLoaded', () => {
@@ -9,8 +9,19 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-const PAT_KEY = 'zousyo_pat';
-const NICK_KEY = 'zousyo_nick';
+const PAT_KEY = 'kbooks_pat';
+const NICK_KEY = 'kbooks_nick';
+
+// 旧キーからの移行(プロジェクト名変更前に保存していたPAT/ニックを引き継ぐ)
+(function migrateLegacyKeys() {
+  for (const [oldKey, newKey] of [['zousyo_pat', PAT_KEY], ['zousyo_nick', NICK_KEY]]) {
+    const old = localStorage.getItem(oldKey);
+    if (old && !localStorage.getItem(newKey)) {
+      localStorage.setItem(newKey, old);
+    }
+    if (old) localStorage.removeItem(oldKey);
+  }
+})();
 
 // QR招待URL(#token=...)で来たときにPATを取り込み、URLからは即除去
 (function bootstrapTokenFromHash() {
@@ -168,19 +179,19 @@ export async function commitMutation(mutate, message) {
       sha = meta.sha;
       source = 'fresh';
     }
-    console.log(`[zousyo] commitMutation attempt=${attempt} source=${source} sha=${sha?.slice(0,7)} items=${items.length}`);
+    console.log(`[k-books] commitMutation attempt=${attempt} source=${source} sha=${sha?.slice(0,7)} items=${items.length}`);
     mutate(items);
     const r = await putFile(token, { items }, sha, message);
     if (r.ok) {
       const j = await r.json();
       const newSha = j?.content?.sha || null;
       _cache = newSha ? { items, sha: newSha } : null;
-      console.log(`[zousyo] commitMutation success newSha=${newSha?.slice(0,7)}`);
+      console.log(`[k-books] commitMutation success newSha=${newSha?.slice(0,7)}`);
       return j;
     }
     const errBody = (await r.text()).slice(0, 250);
     lastInfo = `${r.status} ${errBody}`;
-    console.warn(`[zousyo] commitMutation attempt ${attempt} failed: ${lastInfo}`);
+    console.warn(`[k-books] commitMutation attempt ${attempt} failed: ${lastInfo}`);
     if (r.status === 409 || r.status === 412 || r.status === 422) {
       _cache = null;
       const wait = 500 * Math.pow(1.6, attempt) + Math.random() * 300;

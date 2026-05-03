@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一括登録 - K-books</title>
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="stylesheet" href="./assets/98.css">
+<link rel="stylesheet" href="./assets/app.css">
+<script src="./assets/config.js"></script>
+<script src="https://unpkg.com/html5-qrcode" defer></script>
+</head>
+<body>
+<div class="window">
+  <div class="title-bar">
+    <div class="title-bar-text">一括登録</div>
+    <div class="title-bar-controls">
+      <button aria-label="Close" onclick="location.href='./index.html'"></button>
+    </div>
+  </div>
+  <div class="window-body">
+
+    <fieldset>
+      <legend>連続スキャン</legend>
+      <p class="muted">バーコードを次々に読ませてキューに溜め、最後にまとめて登録します。誤読は「×」で削除可能。</p>
+      <div class="button-row">
+        <button id="scanStart">スキャン開始</button>
+        <button id="scanStop" disabled>停止</button>
+      </div>
+      <div id="reader" style="margin-top:8px;"></div>
+      <div id="scanStatus" class="muted" style="margin-top:6px;"></div>
+    </fieldset>
+
+    <fieldset style="margin-top:12px;">
+      <legend>スキャン済み (<span id="count">0</span>件)</legend>
+      <div id="queueWrap"><p class="muted">まだ何もスキャンされていません。</p></div>
+      <div class="button-row" style="margin-top:8px;">
+        <button id="saveAll" disabled>全件登録</button>
+        <button id="clearAll" type="button">全クリア</button>
+        <button type="button" onclick="location.href='./index.html'">トップへ</button>
+      </div>
+      <div id="saveStatus" style="margin-top:8px;"></div>
+    </fieldset>
+
+  </div>
+</div>
+
+<script type="module" src="./assets/bulk.js"></script>
+</body>
+</html>
