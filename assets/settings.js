@@ -3,7 +3,7 @@ import {
   getNextInviteNum, setNextInviteNum, formatInviteNum,
   config, fetchData, commitMutation, normalize,
   startBarcodeScan, stopBarcodeScan, SCAN_FORMAT_QR_CODE
-} from './core.js?v=2.11';
+} from './core.js?v=2.12';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -145,7 +145,7 @@ async function loadSeriesOptions() {
   const set = new Set(allItems.map(i => i.series).filter(Boolean));
   const arr = [...set].sort((a,b) => a.localeCompare(b, 'ja'));
 
-  // 統合元: チェックボックスリスト(複数選択可)
+  // 統合元: ラベル全体クリックで切替できるネイティブcheckboxリスト
   const list = $('mergeFromList');
   list.innerHTML = '';
   if (arr.length === 0) {
@@ -153,11 +153,10 @@ async function loadSeriesOptions() {
   } else {
     for (const s of arr) {
       const count = allItems.filter(i => i.series === s).length;
-      const id = 'mf_' + s.replace(/[^\w]/g, '_') + '_' + count;
-      const div = document.createElement('div');
-      div.style.cssText = 'padding:1px 0;';
-      div.innerHTML = `<input type="checkbox" id="${escHtml(id)}" data-series="${escHtml(s)}"><label for="${escHtml(id)}">${escHtml(s)} (${count}冊)</label>`;
-      list.appendChild(div);
+      const lbl = document.createElement('label');
+      lbl.className = 'merge-source-row';
+      lbl.innerHTML = `<input type="checkbox" data-series="${escHtml(s)}"><span>${escHtml(s)} (${count}冊)</span>`;
+      list.appendChild(lbl);
     }
     list.querySelectorAll('input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', refreshMergePreview);

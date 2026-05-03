@@ -147,6 +147,36 @@ table th {
   vertical-align: middle;
 }
 
+/* シリーズ統合の元リスト: 98.cssの隠しチェックボックスを使うと折返しが
+   崩れる/タップ判定がずれる問題があるため、この箇所だけネイティブの
+   チェックボックスをそのまま使う。ラベル全体がクリック領域。 */
+.merge-source-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.merge-source-row input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+  position: static;
+  opacity: 1;
+  background: initial;
+  border: initial;
+  margin: 0;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+.merge-source-row > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+}
+
 .date-pick-wrap {
   position: relative;
   display: inline-block;
