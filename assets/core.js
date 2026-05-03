@@ -137,23 +137,45 @@ async function putFile(token, contentObj, sha, message) {
   return r;
 }
 
+// 直前PUT後のSHA+itemsをメモリに保持。GitHub読み取りレプリカの遅延を回避
+let _cache = null;
+
+export function invalidateCache() { _cache = null; }
+
 // mutate(items): items配列を直接編集する関数を渡す。競合したら再取得して再適用
 export async function commitMutation(mutate, message) {
   const token = getPAT();
   if (!token) throw new Error('PATが未設定です。設定画面でPATを入力してください。');
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const { content, sha } = await getFileMeta(token);
-    mutate(content.items);
-    const r = await putFile(token, content, sha, message);
-    if (r.ok) return await r.json();
-    if (r.status === 409 || r.status === 422) {
-      await new Promise(res => setTimeout(res, 200 + Math.random() * 300));
+  for (let attempt = 0; attempt < 6; attempt++) {
+    let items, sha;
+    if (_cache && attempt === 0) {
+      items = JSON.parse(JSON.stringify(_cache.items));
+      sha = _cache.sha;
+    } else {
+      const meta = await getFileMeta(token);
+      items = meta.content.items;
+      sha = meta.sha;
+    }
+    mutate(items);
+    const body = { items };
+    const r = await putFile(token, body, sha, message);
+    if (r.ok) {
+      const j = await r.json();
+      _cache = { items, sha: j.content.sha };
+      return j;
+    }
+    if (r.status === 409 || r.status === 412 || r.status === 422) {
+      _cache = null;
+      const wait = 250 * Math.pow(2, attempt) + Math.random() * 200;
+      await new Promise(res => setTimeout(res, wait));
       continue;
     }
     const err = await r.text();
+    _cache = null;
     throw new Error(`保存失敗 ${r.status}: ${err}`);
   }
-  throw new Error('競合再試行が上限に達しました。時間をおいて再度お試しください。');
+  _cache = null;
+  throw new Error('競合再試行が上限に達しました。少し待ってから再度お試しください。');
 }
 
 // openBD: ISBN -> 書誌
