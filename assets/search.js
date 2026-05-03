@@ -1,4 +1,4 @@
-import { fetchData, commitMutation, normalize } from './core.js?v=1.3';
+import { fetchData, commitMutation, normalize } from './core.js?v=1.4';
 
 const $ = id => document.getElementById(id);
 let allItems = [];
