@@ -147,18 +147,42 @@ table th {
   vertical-align: middle;
 }
 
-/* シリーズ統合の元リスト: 98.cssの隠しチェックボックスを使うと折返しが
-   崩れる/タップ判定がずれる問題があるため、この箇所だけネイティブの
-   チェックボックスをそのまま使う。ラベル全体がクリック領域。 */
-.merge-source-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 0;
-  cursor: pointer;
-  user-select: none;
+/* シリーズ統合の元リスト: テーブル表示。他の入力欄と幅を合わせる。
+   行クリックで checkbox トグル(行全体がタップ領域)。
+   98.cssのチェックボックス隠しスタイルを上書きしてネイティブ表示に。 */
+.merge-from-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: calc(100% - 120px);
+  max-width: 360px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #808080;
+  background: #fff;
 }
-.merge-source-row input[type="checkbox"] {
+#mergeFromTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+#mergeFromTable th,
+#mergeFromTable td {
+  border: 1px solid #c0c0c0;
+  padding: 2px 6px;
+  text-align: left;
+}
+#mergeFromTable thead th {
+  position: sticky;
+  top: 0;
+  background: #c0c0c0;
+}
+#mergeFromTable tbody tr {
+  cursor: pointer;
+}
+#mergeFromTable tbody tr:hover {
+  background: #e6e6e6;
+}
+#mergeFromTable input[type="checkbox"] {
   appearance: auto;
   -webkit-appearance: auto;
   -moz-appearance: auto;
@@ -167,14 +191,24 @@ table th {
   background: initial;
   border: initial;
   margin: 0;
-  flex-shrink: 0;
   width: 16px;
   height: 16px;
 }
-.merge-source-row > span {
-  flex: 1 1 auto;
-  min-width: 0;
-  word-break: break-word;
+#mergeFromTable td:first-child,
+#mergeFromTable th:first-child {
+  text-align: center;
+  width: 36px;
+}
+#mergeFromTable td:last-child,
+#mergeFromTable th:last-child {
+  text-align: right;
+  width: 48px;
+}
+@media (max-width: 600px) {
+  .merge-from-wrap {
+    max-width: none;
+    width: auto;
+  }
 }
 
 .date-pick-wrap {

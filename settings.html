@@ -12,9 +12,9 @@
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./assets/98.css?v=2.12">
-<link rel="stylesheet" href="./assets/app.css?v=2.12">
-<script src="./assets/config.js?v=2.12"></script>
+<link rel="stylesheet" href="./assets/98.css?v=2.13">
+<link rel="stylesheet" href="./assets/app.css?v=2.13">
+<script src="./assets/config.js?v=2.13"></script>
 <script src="https://unpkg.com/html5-qrcode" defer></script>
 </head>
 <body>
@@ -107,7 +107,7 @@
       ・全くの新名に変更(全件改名): 統合先に新しい名前を直接入力</p>
       <div class="field-row">
         <label>統合元(複数可)</label>
-        <div id="mergeFromList" style="flex:1 1 auto;min-width:0;max-height:240px;overflow-y:auto;border:1px solid #808080;background:#fff;padding:4px 6px;"></div>
+        <div id="mergeFromWrap" class="merge-from-wrap"><table id="mergeFromTable"></table></div>
       </div>
       <div class="field-row">
         <label>統合先</label>
@@ -138,6 +138,6 @@
   </div>
 </div>
 
-<script type="module" src="./assets/settings.js?v=2.12"></script>
+<script type="module" src="./assets/settings.js?v=2.13"></script>
 </body>
 </html>

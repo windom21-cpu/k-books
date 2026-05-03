@@ -3,7 +3,7 @@ import {
   getNextInviteNum, setNextInviteNum, formatInviteNum,
   config, fetchData, commitMutation, normalize,
   startBarcodeScan, stopBarcodeScan, SCAN_FORMAT_QR_CODE
-} from './core.js?v=2.12';
+} from './core.js?v=2.13';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -145,21 +145,28 @@ async function loadSeriesOptions() {
   const set = new Set(allItems.map(i => i.series).filter(Boolean));
   const arr = [...set].sort((a,b) => a.localeCompare(b, 'ja'));
 
-  // 統合元: ラベル全体クリックで切替できるネイティブcheckboxリスト
-  const list = $('mergeFromList');
-  list.innerHTML = '';
+  // 統合元: テーブル形式。各行クリックでチェックボックスをトグル
+  const table = $('mergeFromTable');
+  table.innerHTML = '<thead><tr><th>選択</th><th>シリーズ</th><th>冊数</th></tr></thead><tbody></tbody>';
+  const tbody = table.querySelector('tbody');
   if (arr.length === 0) {
-    list.innerHTML = '<p class="muted" style="margin:0;">シリーズが登録されていません</p>';
+    tbody.innerHTML = '<tr><td colspan="3" class="muted">シリーズが登録されていません</td></tr>';
   } else {
     for (const s of arr) {
       const count = allItems.filter(i => i.series === s).length;
-      const lbl = document.createElement('label');
-      lbl.className = 'merge-source-row';
-      lbl.innerHTML = `<input type="checkbox" data-series="${escHtml(s)}"><span>${escHtml(s)} (${count}冊)</span>`;
-      list.appendChild(lbl);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><input type="checkbox" data-series="${escHtml(s)}"></td><td>${escHtml(s)}</td><td>${count}</td>`;
+      tbody.appendChild(tr);
     }
-    list.querySelectorAll('input[type=checkbox]').forEach(cb => {
-      cb.addEventListener('change', refreshMergePreview);
+    // 行のどこをタップしても切替。チェックボックス自身のクリックは
+    // ブラウザが先に処理するので、target判定で二重トグルを防ぐ
+    tbody.querySelectorAll('tr').forEach(tr => {
+      tr.addEventListener('click', (e) => {
+        const cb = tr.querySelector('input[type=checkbox]');
+        if (!cb) return;
+        if (e.target !== cb) cb.checked = !cb.checked;
+        refreshMergePreview();
+      });
     });
   }
 
@@ -176,7 +183,7 @@ async function loadSeriesOptions() {
 loadSeriesOptions();
 
 function getSelectedSources() {
-  return Array.from($('mergeFromList').querySelectorAll('input[type=checkbox]:checked'))
+  return Array.from($('mergeFromTable').querySelectorAll('input[type=checkbox]:checked'))
     .map(cb => cb.dataset.series);
 }
 
