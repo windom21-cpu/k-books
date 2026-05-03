@@ -2414,6 +2414,21 @@
       "addedBy": "001",
       "note": "",
       "acquiredAt": "2026-05-03"
+    },
+    {
+      "id": "d36d184f-8d8e-473e-b287-16c67476a4f1",
+      "series": "鬼滅の刃",
+      "seriesYomi": "キメツ ノ ヤイバ",
+      "volume": 1,
+      "edition": "",
+      "title": "鬼滅の刃 1",
+      "author": "吾峠,呼世晴",
+      "publisher": "集英社",
+      "isbn": "9784088807232",
+      "coverUrl": "",
+      "addedBy": "001",
+      "note": "",
+      "acquiredAt": "2026-05-03"
     }
   ]
 }
