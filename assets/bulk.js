@@ -2,8 +2,8 @@ import {
   uuid, lookupISBN, commitMutation, fetchData,
   findDuplicate, parseVolume, getNick, guessSeriesFromTitle,
   findExistingSeries,
-  startBarcodeScan, stopBarcodeScan
-} from './core.js?v=2.6';
+  startBarcodeScan, stopBarcodeScan, SCAN_FORMAT_EAN_13
+} from './core.js?v=2.7';
 
 const $ = id => document.getElementById(id);
 const queue = [];
@@ -239,7 +239,7 @@ $('scanStart').addEventListener('click', async () => {
       const code = String(raw).replace(/\D/g, '');
       if (!/^97[89]/.test(code)) return;
       await handleScan(code);
-    });
+    }, { formats: [SCAN_FORMAT_EAN_13], fps: 20 });
     $('scanStatus').textContent = 'スキャン中。次々にバーコードを読ませてください';
   } catch (e) {
     $('scanStatus').innerHTML = `<span class="error">${e.message}<br><small>HTTPS/カメラ権限/ブラウザ対応を確認</small></span>`;

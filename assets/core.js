@@ -331,15 +331,35 @@ export function parseVolume(v) {
 
 export const config = CFG;
 
+// html5-qrcodeのフォーマット番号(ライブラリ依存)
+// EAN_13 = 9 (ISBNバーコード), QR_CODE = 0
+export const SCAN_FORMAT_EAN_13 = 9;
+export const SCAN_FORMAT_QR_CODE = 0;
+
 // バーコードスキャン: facingMode で起動 → 失敗時は user に切替 →
 // それでもダメなら getCameras() で列挙して順に試行。
 // 端末によって何が通るかは予測困難なので段階的にフォールバック。
-export async function startBarcodeScan(readerId, onCode) {
+//
+// options:
+//   formats: [number]     スキャン対象フォーマットを限定(認識速度向上)
+//   fps:     number       フレームレート(default 15)
+//   qrbox:   {width, height} スキャン対象領域
+export async function startBarcodeScan(readerId, onCode, options = {}) {
   if (typeof Html5Qrcode === 'undefined') {
     throw new Error('スキャナのロード待ち。少し待って再試行してください。');
   }
   const scanner = new Html5Qrcode(readerId);
-  const config = { fps: 10, qrbox: { width: 280, height: 120 } };
+  const config = {
+    fps: options.fps || 15,
+    qrbox: options.qrbox || { width: 280, height: 120 },
+    // BarcodeDetector APIが使える環境(iOS Safari 16.4+ / 最新Chrome等)では
+    // 内部でネイティブAPIを使い、認識が大幅に高速化される
+    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+  };
+  // フォーマット限定でスキャン速度向上(指定なしは全フォーマット試行=遅い)
+  if (Array.isArray(options.formats) && options.formats.length) {
+    config.formatsToSupport = options.formats;
+  }
   // QR(URL文字列)もISBNバーコードもそのまま渡す。呼出側で必要な処理(数字抽出等)を行う
   const decode = async (decoded) => {
     onCode(String(decoded || ''));

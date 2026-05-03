@@ -1,25 +1,24 @@
-<!doctype html>
-<html lang="ja">
-<head>
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>K-books</title>
-<link rel="icon" href="./favicon.ico" sizes="any">
-<link rel="icon" type="image/svg+xml" href="./favicon.svg">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./assets/98.css?v=2.7">
-<link rel="stylesheet" href="./assets/app.css?v=2.7">
-<script src="./assets/config.js?v=2.7"></script>
+<link rel="icon" href="https://windom21-cpu.github.io/k-books/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="https://windom21-cpu.github.io/k-books/favicon.svg">
+<link rel="apple-touch-icon" href="https://windom21-cpu.github.io/k-books/apple-touch-icon.png">
+<link rel="manifest" href="https://windom21-cpu.github.io/k-books/manifest.json">
+<link rel="stylesheet" href="K-books_files/98.css">
+<link rel="stylesheet" href="K-books_files/app.css">
+<script src="K-books_files/config.js"></script>
 </head>
 <body>
 <div class="window">
   <div class="title-bar">
-    <div class="title-bar-text">K-books</div>
+    <div class="title-bar-text">K-books v2.4</div>
     <div class="title-bar-controls">
       <button aria-label="Minimize"></button>
       <button aria-label="Maximize"></button>
@@ -35,13 +34,13 @@
       <button onclick="location.href='./settings.html'">設定</button>
     </div>
     <hr>
-    <p class="muted" id="status">読み込み中...</p>
-    <div id="recent" style="margin-top:8px;"></div>
+    <p class="muted" id="status">登録冊数: 64 冊  /  PAT: 未設定  /  バージョン: v2.4</p>
+    <div id="recent" style="margin-top:8px;"><p class="muted">最近の登録 (上位5件)</p><table border="1"><thead><tr><th>登録日</th><th>シリーズ</th><th>巻</th><th>登録者</th></tr></thead><tbody><tr><td>2026-05-03</td><td>薬屋のひとりごと : 猫猫の後宮謎解き手帳</td><td>13</td><td>001</td></tr><tr><td>2026-05-03</td><td>SPY×FAMILY</td><td>17</td><td>001</td></tr><tr><td>2026-05-03</td><td>呪術廻戦</td><td>18</td><td>001</td></tr><tr><td>2026-05-03</td><td>呪術廻戦</td><td>11</td><td>001</td></tr><tr><td>2026-05-03</td><td>呪術廻戦</td><td>21</td><td>001</td></tr></tbody></table></div>
   </div>
 </div>
 
 <script type="module">
-  import { fetchData, getPAT } from './assets/core.js?v=2.7';
+  import { fetchData, getPAT } from './assets/core.js?v=2.4';
   const status = document.getElementById('status');
   const recent = document.getElementById('recent');
   const data = await fetchData();
@@ -64,5 +63,6 @@
     recent.innerHTML = html;
   }
 </script>
-</body>
-</html>
+
+
+</body></html>

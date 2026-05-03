@@ -2,8 +2,8 @@ import {
   uuid, lookupISBN, commitMutation, fetchData,
   findDuplicate, parseVolume, getNick, setNick, guessSeriesFromTitle,
   attachCalendarPicker, findExistingSeries,
-  startBarcodeScan, stopBarcodeScan
-} from './core.js?v=2.6';
+  startBarcodeScan, stopBarcodeScan, SCAN_FORMAT_EAN_13
+} from './core.js?v=2.7';
 
 const $ = id => document.getElementById(id);
 const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','acquiredAt','note'];
@@ -144,7 +144,7 @@ $('scanStart').addEventListener('click', async () => {
       $('isbn').value = code;
       await stopScan();
       $('lookup').click();
-    });
+    }, { formats: [SCAN_FORMAT_EAN_13], fps: 20 });
     $('scanStatus').textContent = 'スキャン中...バーコードをカメラに向けてください';
   } catch (e) {
     $('scanStatus').innerHTML = `<span class="error">${e.message}<br><small>HTTPS/カメラ権限/ブラウザ対応を確認(セットアップ手順 → トラブルシューティング)</small></span>`;

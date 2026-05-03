@@ -2,8 +2,8 @@ import {
   getPAT, setPAT, getNick, setNick, getPATSetAt,
   getNextInviteNum, setNextInviteNum, formatInviteNum,
   config, fetchData, commitMutation, normalize,
-  startBarcodeScan, stopBarcodeScan
-} from './core.js?v=2.6';
+  startBarcodeScan, stopBarcodeScan, SCAN_FORMAT_QR_CODE
+} from './core.js?v=2.7';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -106,7 +106,7 @@ $('inviteScanStart').addEventListener('click', async () => {
       refreshPATSetAt();
       $('inviteScanStatus').textContent = '受信完了';
       await stopInviteScan();
-    });
+    }, { formats: [SCAN_FORMAT_QR_CODE], fps: 15, qrbox: { width: 240, height: 240 } });
     $('inviteScanStatus').textContent = '招待QRをカメラに向けてください';
   } catch (e) {
     $('inviteScanStatus').innerHTML = `<span class="error">${e.message}</span>`;
