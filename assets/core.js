@@ -1,4 +1,5 @@
 const CFG = window.APP_CONFIG;
+console.log('[zousyo] core.js v3 loaded');
 
 const PAT_KEY = 'zousyo_pat';
 const NICK_KEY = 'zousyo_nick';
@@ -146,36 +147,43 @@ export function invalidateCache() { _cache = null; }
 export async function commitMutation(mutate, message) {
   const token = getPAT();
   if (!token) throw new Error('PATが未設定です。設定画面でPATを入力してください。');
+  let lastInfo = '';
   for (let attempt = 0; attempt < 6; attempt++) {
-    let items, sha;
+    let items, sha, source;
     if (_cache && attempt === 0) {
       items = JSON.parse(JSON.stringify(_cache.items));
       sha = _cache.sha;
+      source = 'cache';
     } else {
       const meta = await getFileMeta(token);
       items = meta.content.items;
       sha = meta.sha;
+      source = 'fresh';
     }
+    console.log(`[zousyo] commitMutation attempt=${attempt} source=${source} sha=${sha?.slice(0,7)} items=${items.length}`);
     mutate(items);
-    const body = { items };
-    const r = await putFile(token, body, sha, message);
+    const r = await putFile(token, { items }, sha, message);
     if (r.ok) {
       const j = await r.json();
-      _cache = { items, sha: j.content.sha };
+      const newSha = j?.content?.sha || null;
+      _cache = newSha ? { items, sha: newSha } : null;
+      console.log(`[zousyo] commitMutation success newSha=${newSha?.slice(0,7)}`);
       return j;
     }
+    const errBody = (await r.text()).slice(0, 250);
+    lastInfo = `${r.status} ${errBody}`;
+    console.warn(`[zousyo] commitMutation attempt ${attempt} failed: ${lastInfo}`);
     if (r.status === 409 || r.status === 412 || r.status === 422) {
       _cache = null;
-      const wait = 250 * Math.pow(2, attempt) + Math.random() * 200;
+      const wait = 500 * Math.pow(1.6, attempt) + Math.random() * 300;
       await new Promise(res => setTimeout(res, wait));
       continue;
     }
-    const err = await r.text();
     _cache = null;
-    throw new Error(`保存失敗 ${r.status}: ${err}`);
+    throw new Error(`保存失敗 ${lastInfo}`);
   }
   _cache = null;
-  throw new Error('競合再試行が上限に達しました。少し待ってから再度お試しください。');
+  throw new Error(`競合再試行が上限に達しました(最後の応答: ${lastInfo})`);
 }
 
 // openBD: ISBN -> 書誌
