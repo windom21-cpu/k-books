@@ -3,7 +3,7 @@ import {
   findDuplicate, parseVolume, getNick, guessSeriesFromTitle,
   findExistingSeries,
   startBarcodeScan, stopBarcodeScan
-} from './core.js?v=2.5';
+} from './core.js?v=2.6';
 
 const $ = id => document.getElementById(id);
 const queue = [];
@@ -235,7 +235,8 @@ $('scanStart').addEventListener('click', async () => {
   $('scanStop').disabled = false;
   $('scanStatus').textContent = 'カメラ起動中...';
   try {
-    scanner = await startBarcodeScan('reader', async (code) => {
+    scanner = await startBarcodeScan('reader', async (raw) => {
+      const code = String(raw).replace(/\D/g, '');
       if (!/^97[89]/.test(code)) return;
       await handleScan(code);
     });

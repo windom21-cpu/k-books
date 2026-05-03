@@ -3,7 +3,7 @@ import {
   findDuplicate, parseVolume, getNick, setNick, guessSeriesFromTitle,
   attachCalendarPicker, findExistingSeries,
   startBarcodeScan, stopBarcodeScan
-} from './core.js?v=2.5';
+} from './core.js?v=2.6';
 
 const $ = id => document.getElementById(id);
 const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','acquiredAt','note'];
@@ -134,9 +134,10 @@ $('scanStart').addEventListener('click', async () => {
   $('scanStop').disabled = false;
   $('scanStatus').textContent = 'カメラ起動中...';
   try {
-    scanner = await startBarcodeScan('reader', async (code) => {
+    scanner = await startBarcodeScan('reader', async (raw) => {
+      const code = String(raw).replace(/\D/g, '');
       if (!/^97[89]/.test(code)) {
-        $('scanStatus').textContent = `ISBN以外を検出: ${code} (無視)`;
+        $('scanStatus').textContent = `ISBN以外を検出: ${raw.slice(0, 30)} (無視)`;
         return;
       }
       $('scanStatus').textContent = `読取: ${code}`;

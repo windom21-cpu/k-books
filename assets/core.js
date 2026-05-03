@@ -340,9 +340,9 @@ export async function startBarcodeScan(readerId, onCode) {
   }
   const scanner = new Html5Qrcode(readerId);
   const config = { fps: 10, qrbox: { width: 280, height: 120 } };
+  // QR(URL文字列)もISBNバーコードもそのまま渡す。呼出側で必要な処理(数字抽出等)を行う
   const decode = async (decoded) => {
-    const code = String(decoded || '').replace(/\D/g, '');
-    onCode(code);
+    onCode(String(decoded || ''));
   };
 
   const attempts = [

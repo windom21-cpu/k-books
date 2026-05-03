@@ -12,9 +12,10 @@
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./assets/98.css?v=2.5">
-<link rel="stylesheet" href="./assets/app.css?v=2.5">
-<script src="./assets/config.js?v=2.5"></script>
+<link rel="stylesheet" href="./assets/98.css?v=2.6">
+<link rel="stylesheet" href="./assets/app.css?v=2.6">
+<script src="./assets/config.js?v=2.6"></script>
+<script src="https://unpkg.com/html5-qrcode" defer></script>
 </head>
 <body>
 <div class="window">
@@ -66,6 +67,17 @@
         <canvas id="topQrCanvas"></canvas>
         <p id="topQrUrl" class="muted" style="word-break:break-all;"></p>
       </div>
+    </fieldset>
+
+    <fieldset style="margin-top:12px;">
+      <legend>招待QRを読み取る</legend>
+      <p class="muted">管理者が発行した招待QRをこの端末で直接読み取ります。<strong>「ホームに追加」したPWAから起動した端末は、ブラウザとは別の保存領域になるため、PWA内でこちらから読み直す必要があります</strong>。</p>
+      <div class="button-row">
+        <button id="inviteScanStart">スキャン開始</button>
+        <button id="inviteScanStop" disabled>停止</button>
+      </div>
+      <div id="inviteReader" style="margin-top:8px;max-width:360px;"></div>
+      <p id="inviteScanStatus" class="muted" style="margin-top:6px;"></p>
     </fieldset>
 
     <fieldset style="margin-top:12px;">
@@ -123,6 +135,6 @@
   </div>
 </div>
 
-<script type="module" src="./assets/settings.js?v=2.5"></script>
+<script type="module" src="./assets/settings.js?v=2.6"></script>
 </body>
 </html>

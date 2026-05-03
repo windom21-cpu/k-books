@@ -1,8 +1,9 @@
 import {
   getPAT, setPAT, getNick, setNick, getPATSetAt,
   getNextInviteNum, setNextInviteNum, formatInviteNum,
-  config, fetchData, commitMutation, normalize
-} from './core.js?v=2.5';
+  config, fetchData, commitMutation, normalize,
+  startBarcodeScan, stopBarcodeScan
+} from './core.js?v=2.6';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -71,6 +72,57 @@ $('qrShow').addEventListener('click', async () => {
 $('qrHide').addEventListener('click', () => {
   $('qrArea').style.display = 'none';
 });
+
+// === 招待QR読取(PWA等で別ストレージになっている場合に使用) ===
+let inviteScanner = null;
+$('inviteScanStart').addEventListener('click', async () => {
+  $('inviteScanStart').disabled = true;
+  $('inviteScanStop').disabled = false;
+  $('inviteScanStatus').textContent = 'カメラ起動中...';
+  try {
+    inviteScanner = await startBarcodeScan('inviteReader', async (raw) => {
+      const text = String(raw || '');
+      const find = (s, name) => s.match(new RegExp('[?#&]' + name + '=([^&]+)'));
+      const tm = find(text, 'token');
+      if (!tm) {
+        $('inviteScanStatus').textContent = `読取: PATが含まれません(${text.slice(0, 60)})`;
+        return;
+      }
+      let token = '', nick = '';
+      try { token = decodeURIComponent(tm[1]); } catch (e) {}
+      if (!token) {
+        $('inviteScanStatus').textContent = '読取: tokenが空でした';
+        return;
+      }
+      setPAT(token);
+      const nm = find(text, 'nick');
+      if (nm) {
+        try { nick = decodeURIComponent(nm[1]); } catch (e) {}
+        if (nick) setNick(nick);
+      }
+      $('pat').value = token;
+      if (nick) $('nick').value = nick;
+      $('patStatus').innerHTML = `<span style="color:#006400;">QRからPAT受信(ニックネーム: ${nick || '(未指定)'})</span>`;
+      refreshPATSetAt();
+      $('inviteScanStatus').textContent = '受信完了';
+      await stopInviteScan();
+    });
+    $('inviteScanStatus').textContent = '招待QRをカメラに向けてください';
+  } catch (e) {
+    $('inviteScanStatus').innerHTML = `<span class="error">${e.message}</span>`;
+    $('inviteScanStart').disabled = false;
+    $('inviteScanStop').disabled = true;
+  }
+});
+
+async function stopInviteScan() {
+  await stopBarcodeScan(inviteScanner);
+  inviteScanner = null;
+  $('inviteScanStart').disabled = false;
+  $('inviteScanStop').disabled = true;
+}
+$('inviteScanStop').addEventListener('click', stopInviteScan);
+window.addEventListener('beforeunload', stopInviteScan);
 
 $('topQrShow').addEventListener('click', async () => {
   const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html';
