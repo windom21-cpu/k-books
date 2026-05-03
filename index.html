@@ -36,7 +36,7 @@
   const data = await fetchData();
   const n = data.items.length;
   const pat = getPAT() ? '設定済' : '未設定';
-  status.textContent = `登録冊数: ${n} 冊  /  PAT: ${pat}`;
+  status.textContent = `登録冊数: ${n} 冊  /  PAT: ${pat}  /  バージョン: ${window.APP_CONFIG.version}`;
 </script>
 </body>
 </html>

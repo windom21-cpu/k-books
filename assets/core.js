@@ -1,5 +1,13 @@
 const CFG = window.APP_CONFIG;
-console.log('[zousyo] core.js v3 loaded');
+console.log(`[zousyo] core.js loaded (${CFG.version})`);
+
+// タイトルバーにバージョン表示(キャッシュ有無を一目で判断するため)
+window.addEventListener('DOMContentLoaded', () => {
+  const tb = document.querySelector('.title-bar-text');
+  if (tb && CFG.version && !tb.textContent.includes(CFG.version)) {
+    tb.textContent = `${tb.textContent} ${CFG.version}`;
+  }
+});
 
 const PAT_KEY = 'zousyo_pat';
 const NICK_KEY = 'zousyo_nick';
