@@ -53,8 +53,34 @@ export function normalize(s) {
     .replace(/[!-/:-@\[-`{-~、。「」『』・，．]/g, '');
 }
 
-// データ取得: raw.githubusercontent.com から(キャッシュ回避にcache-busting)
+// PATがあれば認証付きAPI経由(CDNキャッシュ回避で常に最新)、無ければraw経由
 export async function fetchData() {
+  const token = getPAT();
+  if (token) {
+    try {
+      const url = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/contents/${CFG.dataFile}?ref=${CFG.branch}`;
+      const r = await fetch(url, {
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'Authorization': `Bearer ${token}`,
+          'If-None-Match': ''
+        },
+        cache: 'no-store'
+      });
+      if (r.ok) {
+        const j = await r.json();
+        const bytes = Uint8Array.from(atob(j.content.replace(/\n/g, '')), c => c.charCodeAt(0));
+        const text = new TextDecoder().decode(bytes);
+        const data = JSON.parse(text);
+        if (!data.items) data.items = [];
+        return data;
+      }
+      if (r.status === 404) return { items: [] };
+      console.warn(`API fetch returned ${r.status}, falling back to raw`);
+    } catch (e) {
+      console.warn('API fetch failed, falling back to raw', e);
+    }
+  }
   const url = `https://raw.githubusercontent.com/${CFG.owner}/${CFG.repo}/${CFG.branch}/${CFG.dataFile}?_=${Date.now()}`;
   try {
     const r = await fetch(url, { cache: 'no-store' });
