@@ -10,9 +10,9 @@
 <link rel="icon" href="./favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./assets/98.css?v=1.4">
-<link rel="stylesheet" href="./assets/app.css?v=1.4">
-<script src="./assets/config.js?v=1.4"></script>
+<link rel="stylesheet" href="./assets/98.css?v=1.5">
+<link rel="stylesheet" href="./assets/app.css?v=1.5">
+<script src="./assets/config.js?v=1.5"></script>
 <script src="https://unpkg.com/html5-qrcode" defer></script>
 </head>
 <body>
@@ -59,7 +59,7 @@
       <div class="field-row"><label>出版社</label><input type="text" id="publisher"></div>
       <div class="field-row"><label>表紙URL</label><input type="text" id="coverUrl"></div>
       <div class="field-row"><label>登録者</label><input type="text" id="addedBy" placeholder="ニックネーム"></div>
-      <div class="field-row"><label>登録日</label><input type="date" id="acquiredAt"></div>
+      <div class="field-row"><label>登録日</label><input type="text" id="acquiredAt" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}"></div>
       <div class="field-row"><label>メモ</label><textarea id="note"></textarea></div>
 
       <div class="button-row">
@@ -73,6 +73,6 @@
   </div>
 </div>
 
-<script type="module" src="./assets/register.js?v=1.4"></script>
+<script type="module" src="./assets/register.js?v=1.5"></script>
 </body>
 </html>
