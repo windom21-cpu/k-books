@@ -1,4 +1,8 @@
-import { getPAT, setPAT, getNick, setNick, getPATSetAt, config, fetchData, commitMutation, normalize } from './core.js?v=2.1';
+import {
+  getPAT, setPAT, getNick, setNick, getPATSetAt,
+  getNextInviteNum, setNextInviteNum, formatInviteNum,
+  config, fetchData, commitMutation, normalize
+} from './core.js?v=2.2';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -35,17 +39,34 @@ $('patClear').addEventListener('click', () => {
   refreshPATSetAt();
 });
 
+// 招待番号の表示同期
+$('nextInviteNum').value = getNextInviteNum();
+$('nextInviteNum').addEventListener('change', () => {
+  const v = parseInt($('nextInviteNum').value, 10);
+  if (Number.isFinite(v) && v >= 1) {
+    setNextInviteNum(v);
+  } else {
+    $('nextInviteNum').value = getNextInviteNum();
+  }
+});
+
 $('qrShow').addEventListener('click', async () => {
   const pat = getPAT();
   if (!pat) {
     $('patStatus').innerHTML = '<span class="error">先にPATを保存してください</span>';
     return;
   }
+  const num = parseInt($('nextInviteNum').value, 10) || 2;
+  const nick = formatInviteNum(num);
   const base = location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html';
-  const url = `${base}#token=${encodeURIComponent(pat)}`;
+  const url = `${base}#token=${encodeURIComponent(pat)}&nick=${encodeURIComponent(nick)}`;
   $('qrUrl').textContent = url;
+  $('qrAssignedNick').textContent = `この招待のニックネーム: ${nick}`;
   $('qrArea').style.display = 'block';
   await QRCode.toCanvas($('qrCanvas'), url, { width: 240, margin: 2 });
+  // 表示成功後にカウントアップ
+  setNextInviteNum(num + 1);
+  $('nextInviteNum').value = num + 1;
 });
 $('qrHide').addEventListener('click', () => {
   $('qrArea').style.display = 'none';

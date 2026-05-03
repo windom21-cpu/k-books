@@ -11,6 +11,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 const PAT_KEY = 'kbooks_pat';
 const NICK_KEY = 'kbooks_nick';
+const PAT_DATE_KEY = 'kbooks_pat_set_at';
+const NEXT_INVITE_KEY = 'kbooks_next_invite_num';
 
 // 旧キーからの移行(プロジェクト名変更前に保存していたPAT/ニックを引き継ぐ)
 (function migrateLegacyKeys() {
@@ -23,26 +25,35 @@ const NICK_KEY = 'kbooks_nick';
   }
 })();
 
-// QR招待URL(#token=...)で来たときにPATを取り込み、URLからは即除去
+// QR招待URL(#token=...&nick=...)で来たときにPATとニックを取り込み、URLからは即除去
 (function bootstrapTokenFromHash() {
   const h = location.hash;
-  const m = h.match(/[#&]token=([^&]+)/);
-  if (!m) return;
-  const token = decodeURIComponent(m[1]);
+  const tm = h.match(/[#&]token=([^&]+)/);
+  if (!tm) return;
+  const token = decodeURIComponent(tm[1]);
   localStorage.setItem(PAT_KEY, token);
-  const stripped = h.replace(/([#&])token=[^&]+&?/, '$1').replace(/[#&]$/, '');
+  localStorage.setItem(PAT_DATE_KEY, new Date().toISOString().slice(0, 10));
+
+  let receivedNick = '';
+  const nm = h.match(/[#&]nick=([^&]+)/);
+  if (nm) {
+    receivedNick = decodeURIComponent(nm[1]);
+    if (receivedNick) localStorage.setItem(NICK_KEY, receivedNick);
+  }
+
+  const stripped = h.replace(/[#&](token|nick)=[^&]+/g, '').replace(/[#&]$/, '');
   history.replaceState(null, '', location.pathname + location.search + stripped);
-  // 軽い通知
+
   window.addEventListener('DOMContentLoaded', () => {
     const t = document.createElement('div');
-    t.textContent = 'PATを受け取りました';
+    t.textContent = receivedNick
+      ? `PATを受け取りました(ニックネーム: ${receivedNick})`
+      : 'PATを受け取りました';
     t.style.cssText = 'position:fixed;top:8px;right:8px;background:#000080;color:#fff;padding:6px 10px;font:12px "MS UI Gothic",sans-serif;z-index:9999;';
     document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2500);
+    setTimeout(() => t.remove(), 3000);
   });
 })();
-
-const PAT_DATE_KEY = 'kbooks_pat_set_at';
 
 export function getPAT() {
   return localStorage.getItem(PAT_KEY) || '';
@@ -62,6 +73,18 @@ export function setPAT(t) {
 }
 export function getPATSetAt() {
   return localStorage.getItem(PAT_DATE_KEY) || '';
+}
+
+// 招待番号(あなた=001、家族は002から)。文字列で扱う(ゼロ埋め保持)
+export function getNextInviteNum() {
+  const v = localStorage.getItem(NEXT_INVITE_KEY);
+  return v ? parseInt(v, 10) : 2;
+}
+export function setNextInviteNum(n) {
+  if (Number.isFinite(n) && n >= 1) localStorage.setItem(NEXT_INVITE_KEY, String(n));
+}
+export function formatInviteNum(n) {
+  return String(n).padStart(3, '0');
 }
 export function getNick() {
   return localStorage.getItem(NICK_KEY) || '';
