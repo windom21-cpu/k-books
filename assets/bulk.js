@@ -1,7 +1,8 @@
 import {
   uuid, lookupISBN, commitMutation, fetchData,
-  findDuplicate, parseVolume, getNick, guessSeriesFromTitle
-} from './core.js?v=1.7';
+  findDuplicate, parseVolume, getNick, guessSeriesFromTitle,
+  findExistingSeries
+} from './core.js?v=1.8';
 
 const $ = id => document.getElementById(id);
 const queue = [];
@@ -97,7 +98,10 @@ async function handleScan(isbn) {
   }
 
   const vol = parseVolume(r.volume) ?? parseVolume(r.title);
-  const series = guessSeriesFromTitle(r.title) || r.series || '';
+  let series = guessSeriesFromTitle(r.title) || r.series || '';
+  // 既存蔵書に同名(正規化後同じ)があれば既存の表記に寄せる
+  const canonical = findExistingSeries(existing.items, series);
+  if (canonical) series = canonical;
   entry.book = {
     series,
     seriesYomi: r.yomi || '',

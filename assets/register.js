@@ -1,8 +1,8 @@
 import {
   uuid, lookupISBN, commitMutation, fetchData,
   findDuplicate, parseVolume, getNick, setNick, guessSeriesFromTitle,
-  attachCalendarPicker
-} from './core.js?v=1.7';
+  attachCalendarPicker, findExistingSeries
+} from './core.js?v=1.8';
 
 const $ = id => document.getElementById(id);
 const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','acquiredAt','note'];
@@ -28,6 +28,23 @@ function clearForm() {
 
 clearForm();
 attachCalendarPicker('acquiredAt', 'acquiredAtPickBtn');
+
+// 既存蔵書のシリーズ名をdatalistに流し込んでサジェスト表示
+let existingItems = [];
+(async () => {
+  const data = await fetchData();
+  existingItems = data.items;
+  const seriesSet = new Set(existingItems.map(i => i.series).filter(Boolean));
+  const dl = document.getElementById('seriesList');
+  if (dl) {
+    dl.innerHTML = '';
+    [...seriesSet].sort((a,b) => a.localeCompare(b, 'ja')).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      dl.appendChild(opt);
+    });
+  }
+})();
 
 $('lookup').addEventListener('click', async () => {
   const isbn = $('isbn').value.trim();
@@ -82,6 +99,11 @@ $('save').addEventListener('click', async () => {
   // 事前チェック(競合の前に重複ヒットなら早期警告)
   $('saveStatus').textContent = '重複確認中...';
   const data = await fetchData();
+  // 表記ゆれ吸収: 既存と正規化後同じシリーズ名なら既存表記を採用
+  const canonical = findExistingSeries(data.items, candidate.series);
+  if (canonical && canonical !== candidate.series) {
+    candidate.series = canonical;
+  }
   const dup = findDuplicate(data.items, candidate);
   if (dup) {
     if (!confirm(`既に登録されています:\n${dup.series} ${dup.volume}巻 (${dup.edition || '通常'})\nそれでも登録しますか?`)) {

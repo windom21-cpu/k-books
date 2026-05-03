@@ -1,4 +1,4 @@
-import { fetchData, commitMutation, normalize, attachCalendarPicker } from './core.js?v=1.7';
+import { fetchData, commitMutation, normalize, attachCalendarPicker } from './core.js?v=1.8';
 
 const $ = id => document.getElementById(id);
 let allItems = [];
@@ -31,10 +31,12 @@ async function load() {
   render($('q').value);
 }
 
+// 表記ゆれ(末尾スペース・全/半角・記号差)を吸収するため、
+// 正規化後の値をグループキーに使う。表示名は最初に出現した表記を採用。
 function groupBySeriesEdition(items) {
   const groups = new Map();
   for (const it of items) {
-    const key = `${it.series}__${it.edition || ''}`;
+    const key = `${normalize(it.series)}__${normalize(it.edition || '')}`;
     if (!groups.has(key)) groups.set(key, { series: it.series, edition: it.edition || '', items: [] });
     groups.get(key).items.push(it);
   }

@@ -253,6 +253,16 @@ export function findDuplicate(items, candidate) {
   return items.find(i => dupKey(i) === k);
 }
 
+// 既存蔵書に「正規化後同じ」シリーズ名があれば、その正規表記を返す。
+// 表記ゆれを増やさず、既存表記に寄せるための正規化ヘルパ。
+export function findExistingSeries(items, candidateSeries) {
+  if (!candidateSeries) return null;
+  const n = normalize(candidateSeries);
+  if (!n) return null;
+  const match = items.find(i => normalize(i.series) === n);
+  return match ? match.series : null;
+}
+
 // タイトルからシリーズ名を抽出(openBDの`series`フィールドはレーベル名で
 // 別作品同士が同じ値になるため、こちらを優先する)
 export function guessSeriesFromTitle(title) {
