@@ -1,8 +1,9 @@
 import {
   uuid, lookupISBN, commitMutation, fetchData,
   findDuplicate, parseVolume, getNick, setNick, guessSeriesFromTitle,
-  attachCalendarPicker, findExistingSeries
-} from './core.js?v=2.3';
+  attachCalendarPicker, findExistingSeries,
+  startBarcodeScan, stopBarcodeScan
+} from './core.js?v=2.4';
 
 const $ = id => document.getElementById(id);
 const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','acquiredAt','note'];
@@ -129,45 +130,31 @@ $('save').addEventListener('click', async () => {
 // バーコードスキャナ
 let scanner = null;
 $('scanStart').addEventListener('click', async () => {
-  if (typeof Html5Qrcode === 'undefined') {
-    $('scanStatus').innerHTML = '<span class="error">スキャナのロード待ちです。少し待って再試行してください。</span>';
-    return;
-  }
-  scanner = new Html5Qrcode('reader');
   $('scanStart').disabled = true;
   $('scanStop').disabled = false;
   $('scanStatus').textContent = 'カメラ起動中...';
   try {
-    await scanner.start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 280, height: 120 } },
-      async (decoded) => {
-        const code = decoded.replace(/\D/g, '');
-        // ISBN(978/979始まり)以外は無視
-        if (!/^97[89]/.test(code)) {
-          $('scanStatus').textContent = `ISBN以外を検出: ${code} (無視)`;
-          return;
-        }
-        $('scanStatus').textContent = `読取: ${code}`;
-        $('isbn').value = code;
-        await stopScan();
-        $('lookup').click();
-      },
-      () => {}
-    );
+    scanner = await startBarcodeScan('reader', async (code) => {
+      if (!/^97[89]/.test(code)) {
+        $('scanStatus').textContent = `ISBN以外を検出: ${code} (無視)`;
+        return;
+      }
+      $('scanStatus').textContent = `読取: ${code}`;
+      $('isbn').value = code;
+      await stopScan();
+      $('lookup').click();
+    });
     $('scanStatus').textContent = 'スキャン中...バーコードをカメラに向けてください';
   } catch (e) {
-    $('scanStatus').innerHTML = `<span class="error">カメラ起動失敗: ${e.message || e}</span>`;
+    $('scanStatus').innerHTML = `<span class="error">${e.message}<br><small>HTTPS/カメラ権限/ブラウザ対応を確認(セットアップ手順 → トラブルシューティング)</small></span>`;
     $('scanStart').disabled = false;
     $('scanStop').disabled = true;
   }
 });
 
 async function stopScan() {
-  if (scanner) {
-    try { await scanner.stop(); await scanner.clear(); } catch (e) {}
-    scanner = null;
-  }
+  await stopBarcodeScan(scanner);
+  scanner = null;
   $('scanStart').disabled = false;
   $('scanStop').disabled = true;
 }

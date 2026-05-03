@@ -1,4 +1,4 @@
-import { fetchData, commitMutation, normalize, attachCalendarPicker } from './core.js?v=2.3';
+import { fetchData, commitMutation, normalize, attachCalendarPicker } from './core.js?v=2.4';
 
 const $ = id => document.getElementById(id);
 let allItems = [];

@@ -11,8 +11,8 @@
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./assets/98.css?v=2.3">
-<link rel="stylesheet" href="./assets/app.css?v=2.3">
+<link rel="stylesheet" href="./assets/98.css?v=2.4">
+<link rel="stylesheet" href="./assets/app.css?v=2.4">
 <style>
   ol, ul { padding-left: 20px; }
   ol li, ul li { margin: 4px 0; }
@@ -113,7 +113,8 @@
       <legend>トラブルシューティング</legend>
       <table border="1">
         <tr><th>症状</th><th>対処</th></tr>
-        <tr><td>カメラが起動しない</td><td>HTTPSでアクセスしているか確認(GitHub PagesならOK)。iOSはSafari、AndroidはChromeで使用</td></tr>
+        <tr><td>カメラが起動しない / 「カメラ起動失敗」</td><td>① HTTPSでアクセス(GitHub PagesならOK、<code>file://</code>不可) ② カメラ権限を許可(初回ブロックすると要リセット: ブラウザのサイト設定→カメラ→許可) ③ iOS Safari / Android Chrome を推奨 ④ 他アプリ(LINEなど)がカメラ占有していないか</td></tr>
+        <tr><td>背面カメラが選ばれない / フロントが映る</td><td>v2.4以降は自動で背面→フロント→列挙順に再試行する。それでもダメな場合は端末がデュアルカメラ未対応(PC等)</td></tr>
         <tr><td>保存時に「PATが未設定です」</td><td>設定画面でPATを保存</td></tr>
         <tr><td>保存時に「保存失敗 401/403」</td><td>PATの権限不足または失効。STEP1で再発行</td></tr>
         <tr><td>保存失敗 422/409 を繰り返す</td><td>誰かが同時に書き込み中。少し待って再試行(自動リトライ4回)</td></tr>

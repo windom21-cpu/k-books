@@ -321,6 +321,62 @@ export function parseVolume(v) {
 
 export const config = CFG;
 
+// バーコードスキャン: facingMode で起動 → 失敗時は user に切替 →
+// それでもダメなら getCameras() で列挙して順に試行。
+// 端末によって何が通るかは予測困難なので段階的にフォールバック。
+export async function startBarcodeScan(readerId, onCode) {
+  if (typeof Html5Qrcode === 'undefined') {
+    throw new Error('スキャナのロード待ち。少し待って再試行してください。');
+  }
+  const scanner = new Html5Qrcode(readerId);
+  const config = { fps: 10, qrbox: { width: 280, height: 120 } };
+  const decode = async (decoded) => {
+    const code = String(decoded || '').replace(/\D/g, '');
+    onCode(code);
+  };
+
+  const attempts = [
+    { facingMode: 'environment' },
+    { facingMode: 'user' }
+  ];
+  let lastError = null;
+  for (const constraint of attempts) {
+    try {
+      await scanner.start(constraint, config, decode, () => {});
+      return scanner;
+    } catch (e) {
+      lastError = e;
+      console.warn('[k-books] camera attempt failed:', constraint, e);
+    }
+  }
+
+  try {
+    const cams = await Html5Qrcode.getCameras();
+    if (cams && cams.length) {
+      for (const c of cams) {
+        try {
+          await scanner.start(c.id, config, decode, () => {});
+          return scanner;
+        } catch (e) {
+          lastError = e;
+          console.warn('[k-books] camera id failed:', c.id, c.label, e);
+        }
+      }
+    }
+  } catch (e) {
+    lastError = e;
+  }
+
+  const msg = (lastError && lastError.message) || String(lastError) || '原因不明';
+  throw new Error(`カメラ起動失敗: ${msg}`);
+}
+
+export async function stopBarcodeScan(scanner) {
+  if (!scanner) return;
+  try { await scanner.stop(); } catch (e) {}
+  try { await scanner.clear(); } catch (e) {}
+}
+
 // HTML側で透明な <input type="date"> を 📅ボタンの上にオーバーレイ配置し、
 // タップをネイティブのdate inputに直接渡す方式。
 // 動的createElement+showPickerはAndroid Chromeで不発になるケースがあるため
