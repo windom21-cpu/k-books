@@ -1,7 +1,7 @@
 import {
   uuid, lookupISBN, commitMutation, fetchData,
   findDuplicate, parseVolume, getNick
-} from './core.js?v=1.1';
+} from './core.js?v=1.2';
 
 const $ = id => document.getElementById(id);
 const queue = [];

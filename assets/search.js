@@ -1,4 +1,4 @@
-import { fetchData, commitMutation, normalize } from './core.js?v=1.1';
+import { fetchData, commitMutation, normalize } from './core.js?v=1.2';
 
 const $ = id => document.getElementById(id);
 let allItems = [];
@@ -31,26 +31,27 @@ async function load() {
   render($('q').value);
 }
 
-function render(query) {
-  const groupedDiv = $('grouped');
-  let candidates;
-  if (!query.trim()) {
-    candidates = allItems.slice();
-  } else {
-    const q = normalize(query);
-    candidates = fuse.search(q).map(r => r.item);
-  }
-
-  // シリーズ + 版 でグルーピング
+function groupBySeriesEdition(items) {
   const groups = new Map();
-  for (const it of candidates) {
+  for (const it of items) {
     const key = `${it.series}__${it.edition || ''}`;
     if (!groups.has(key)) groups.set(key, { series: it.series, edition: it.edition || '', items: [] });
     groups.get(key).items.push(it);
   }
-
   const arr = [...groups.values()];
   arr.sort((a, b) => a.series.localeCompare(b.series, 'ja'));
+  return arr;
+}
+
+function render(query) {
+  const groupedDiv = $('grouped');
+  if (!query.trim()) {
+    renderSummary(groupedDiv, allItems);
+    return;
+  }
+  const q = normalize(query);
+  const candidates = fuse.search(q).map(r => r.item);
+  const arr = groupBySeriesEdition(candidates);
 
   if (arr.length === 0) {
     groupedDiv.innerHTML = '<p class="muted">該当なし</p>';
@@ -81,6 +82,39 @@ function render(query) {
   groupedDiv.innerHTML = html;
   for (const b of groupedDiv.querySelectorAll('.editBtn')) {
     b.addEventListener('click', () => openEdit(b.dataset.id));
+  }
+}
+
+function renderSummary(div, items) {
+  const arr = groupBySeriesEdition(items);
+  if (arr.length === 0) {
+    div.innerHTML = '<p class="muted">蔵書はまだありません。</p>';
+    return;
+  }
+  let html = '<p class="muted">シリーズ一覧。クリックで詳細表示。検索語入力でも絞り込めます。</p>';
+  html += '<table border="1"><thead><tr>';
+  html += '<th>シリーズ</th><th>版</th><th>所持</th><th>最大巻</th><th>抜け</th>';
+  html += '</tr></thead><tbody>';
+  for (const g of arr) {
+    const vols = g.items.map(i => i.volume).filter(v => v != null).sort((a,b) => a-b);
+    const max = vols.length ? vols[vols.length - 1] : 0;
+    const missing = findMissing(vols);
+    html += `<tr style="cursor:pointer;" data-series="${esc(g.series)}">
+      <td>${esc(g.series)}</td>
+      <td>${esc(g.edition)}</td>
+      <td>${g.items.length}</td>
+      <td>${max || ''}</td>
+      <td>${missing.length ? esc(missing.join(',')) : '-'}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  div.innerHTML = html;
+  for (const tr of div.querySelectorAll('tr[data-series]')) {
+    tr.addEventListener('click', () => {
+      $('q').value = tr.dataset.series;
+      render($('q').value);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 }
 
@@ -171,5 +205,10 @@ $('e_delete').addEventListener('click', async () => {
 
 $('q').addEventListener('input', () => render($('q').value));
 $('reload').addEventListener('click', load);
+$('qClear').addEventListener('click', () => {
+  $('q').value = '';
+  render('');
+  $('q').focus();
+});
 
 load();

@@ -1,4 +1,4 @@
-import { getPAT, setPAT, getNick, setNick, config } from './core.js?v=1.1';
+import { getPAT, setPAT, getNick, setNick, config } from './core.js?v=1.2';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);

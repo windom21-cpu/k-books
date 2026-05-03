@@ -10,9 +10,9 @@
 <link rel="icon" href="./favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./assets/98.css?v=1.1">
-<link rel="stylesheet" href="./assets/app.css?v=1.1">
-<script src="./assets/config.js?v=1.1"></script>
+<link rel="stylesheet" href="./assets/98.css?v=1.2">
+<link rel="stylesheet" href="./assets/app.css?v=1.2">
+<script src="./assets/config.js?v=1.2"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
 </head>
 <body>
@@ -28,7 +28,9 @@
     <div class="field-row">
       <label>検索語</label>
       <input type="text" id="q" placeholder="シリーズ名・タイトル・著者(かな可)" autofocus>
+      <button id="qClear" type="button" title="検索語をクリア">×</button>
       <button id="reload" type="button" title="最新の状態を再取得">再読込</button>
+      <button type="button" onclick="location.href='./index.html'">トップへ</button>
     </div>
 
     <p class="muted" id="status"></p>
@@ -76,6 +78,6 @@
   </div>
 </div>
 
-<script type="module" src="./assets/search.js?v=1.1"></script>
+<script type="module" src="./assets/search.js?v=1.2"></script>
 </body>
 </html>
