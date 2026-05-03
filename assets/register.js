@@ -1,10 +1,12 @@
 import {
   uuid, lookupISBN, commitMutation, fetchData,
   findDuplicate, parseVolume, getNick, setNick
-} from './core.js?v=0.9';
+} from './core.js?v=1.0';
 
 const $ = id => document.getElementById(id);
-const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','note'];
+const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','acquiredAt','note'];
+
+function todayStr() { return new Date().toISOString().slice(0, 10); }
 
 function readForm() {
   const o = {};
@@ -20,6 +22,7 @@ function clearForm() {
   for (const k of fields) $(k).value = '';
   $('edition').value = '';
   $('addedBy').value = getNick();
+  $('acquiredAt').value = todayStr();
 }
 
 clearForm();
@@ -77,7 +80,7 @@ $('save').addEventListener('click', async () => {
     coverUrl: f.coverUrl,
     addedBy: f.addedBy,
     note: f.note,
-    acquiredAt: new Date().toISOString().slice(0, 10)
+    acquiredAt: f.acquiredAt || todayStr()
   };
 
   // 事前チェック(競合の前に重複ヒットなら早期警告)

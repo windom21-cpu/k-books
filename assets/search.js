@@ -1,4 +1,4 @@
-import { fetchData, commitMutation, normalize } from './core.js?v=0.9';
+import { fetchData, commitMutation, normalize } from './core.js?v=1.0';
 
 const $ = id => document.getElementById(id);
 let allItems = [];
@@ -64,14 +64,15 @@ function render(query) {
     const vols = g.items.map(i => i.volume).filter(v => v != null).sort((a,b) => a-b);
     const missing = findMissing(vols);
     html += `<table border="1" style="margin-bottom:12px;">`;
-    html += `<thead><tr><th colspan="5">${esc(g.series)}${g.edition ? ' [' + esc(g.edition) + ']' : ''} — 所持 ${g.items.length}冊 / 最大 ${max}巻${missing.length ? ' / 抜け: ' + missing.join(',') : ''}</th></tr>`;
-    html += `<tr><th>巻</th><th>タイトル</th><th>ISBN</th><th>登録者</th><th></th></tr></thead><tbody>`;
+    html += `<thead><tr><th colspan="6">${esc(g.series)}${g.edition ? ' [' + esc(g.edition) + ']' : ''} — 所持 ${g.items.length}冊 / 最大 ${max}巻${missing.length ? ' / 抜け: ' + missing.join(',') : ''}</th></tr>`;
+    html += `<tr><th>巻</th><th>タイトル</th><th>ISBN</th><th>登録者</th><th>登録日</th><th></th></tr></thead><tbody>`;
     for (const it of g.items) {
       html += `<tr>
         <td>${it.volume ?? ''}</td>
         <td>${esc(it.title || '')}</td>
         <td>${esc(it.isbn || '')}</td>
         <td>${esc(it.addedBy || '')}</td>
+        <td>${esc(it.acquiredAt || '')}</td>
         <td><button data-id="${it.id}" class="editBtn">編集</button></td>
       </tr>`;
     }
@@ -109,6 +110,7 @@ function openEdit(id) {
   $('e_publisher').value = it.publisher || '';
   $('e_isbn').value = it.isbn || '';
   $('e_coverUrl').value = it.coverUrl || '';
+  $('e_acquiredAt').value = it.acquiredAt || '';
   $('e_note').value = it.note || '';
   $('e_status').textContent = '';
   $('detail').style.display = 'block';
@@ -137,6 +139,7 @@ $('e_save').addEventListener('click', async () => {
       cur.publisher = $('e_publisher').value.trim();
       cur.isbn = $('e_isbn').value.trim();
       cur.coverUrl = $('e_coverUrl').value.trim();
+      cur.acquiredAt = $('e_acquiredAt').value.trim();
       cur.note = $('e_note').value.trim();
     }, `update: ${$('e_series').value} ${$('e_volume').value}巻`);
     $('e_status').innerHTML = '<span style="color:#006400;">保存しました</span>';
