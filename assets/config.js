@@ -5,5 +5,5 @@ window.APP_CONFIG = {
   branch: 'main',
   dataFile: 'data.json',
   appTitle: 'K-books',
-  version: 'v0.7'
+  version: 'v0.8'
 };
