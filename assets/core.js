@@ -273,3 +273,31 @@ export function parseVolume(v) {
 }
 
 export const config = CFG;
+
+// テキスト入力(YYYY-MM-DD)の隣のボタンを押すとカレンダーピッカーが開き、
+// 選んだ日付を元のテキスト入力に書き戻す。
+// レイアウトは98.css風の見た目を維持しつつ、機能だけネイティブに任せる。
+export function attachCalendarPicker(textInputId, buttonId) {
+  const text = document.getElementById(textInputId);
+  const btn = document.getElementById(buttonId);
+  if (!text || !btn) return;
+  btn.addEventListener('click', () => {
+    const picker = document.createElement('input');
+    picker.type = 'date';
+    picker.value = text.value || new Date().toISOString().slice(0, 10);
+    picker.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px;';
+    document.body.appendChild(picker);
+    const cleanup = () => setTimeout(() => picker.remove(), 200);
+    picker.addEventListener('change', () => {
+      if (picker.value) text.value = picker.value;
+      cleanup();
+    });
+    picker.addEventListener('blur', cleanup);
+    if (picker.showPicker) {
+      try { picker.showPicker(); } catch (e) { picker.focus(); picker.click(); }
+    } else {
+      picker.focus();
+      picker.click();
+    }
+  });
+}

@@ -1,7 +1,8 @@
 import {
   uuid, lookupISBN, commitMutation, fetchData,
-  findDuplicate, parseVolume, getNick, setNick, guessSeriesFromTitle
-} from './core.js?v=1.6';
+  findDuplicate, parseVolume, getNick, setNick, guessSeriesFromTitle,
+  attachCalendarPicker
+} from './core.js?v=1.7';
 
 const $ = id => document.getElementById(id);
 const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','acquiredAt','note'];
@@ -26,6 +27,7 @@ function clearForm() {
 }
 
 clearForm();
+attachCalendarPicker('acquiredAt', 'acquiredAtPickBtn');
 
 $('lookup').addEventListener('click', async () => {
   const isbn = $('isbn').value.trim();
