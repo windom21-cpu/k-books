@@ -198,22 +198,19 @@ table th {
 #mergeFromTable tbody tr:hover {
   background: #e6e6e6;
 }
-#mergeFromTable input[type="checkbox"] {
-  appearance: auto;
-  -webkit-appearance: auto;
-  -moz-appearance: auto;
-  position: static;
-  opacity: 1;
-  background: initial;
-  border: initial;
-  margin: 0;
-  width: 16px;
-  height: 16px;
-}
+/* checkboxは98.cssの隠しinput+label:before方式をそのまま使う(他箇所と統一感)。
+   labelは空でよく、:beforeで描画される視覚チェックがcell先頭に来る。 */
 #mergeFromTable td:first-child,
 #mergeFromTable th:first-child {
-  text-align: center;
-  width: 36px;
+  text-align: left;
+  width: 28px;
+  padding-left: 6px;
+}
+#mergeFromTable td:first-child label {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  vertical-align: middle;
 }
 #mergeFromTable td:last-child,
 #mergeFromTable th:last-child {

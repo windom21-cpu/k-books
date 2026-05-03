@@ -3,7 +3,7 @@ import {
   getNextInviteNum, setNextInviteNum, formatInviteNum,
   config, fetchData, commitMutation, normalize,
   startBarcodeScan, stopBarcodeScan, SCAN_FORMAT_QR_CODE
-} from './core.js?v=2.14';
+} from './core.js?v=2.15';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -106,7 +106,7 @@ $('inviteScanStart').addEventListener('click', async () => {
       refreshPATSetAt();
       $('inviteScanStatus').textContent = '受信完了';
       await stopInviteScan();
-    }, { formats: [SCAN_FORMAT_QR_CODE], fps: 15, qrbox: { width: 240, height: 240 } });
+    }, { formats: [SCAN_FORMAT_QR_CODE], fps: 15, qrbox: { width: 220, height: 220 } });
     $('inviteScanStatus').textContent = '招待QRをカメラに向けてください';
   } catch (e) {
     $('inviteScanStatus').innerHTML = `<span class="error">${e.message}</span>`;
@@ -171,17 +171,23 @@ async function loadSeriesOptions() {
   if (arr.length === 0) {
     tbody.innerHTML = '<tr><td colspan="3" class="muted">シリーズが登録されていません</td></tr>';
   } else {
-    for (const s of arr) {
-      const count = allItems.filter(i => i.series === s).length;
+    arr.forEach((s, i) => {
+      const count = allItems.filter(i2 => i2.series === s).length;
+      const cbId = `mfcb_${i}`;
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td><input type="checkbox" data-series="${escHtml(s)}"></td><td>${escHtml(s)}</td><td>${count}</td>`;
+      // 98.cssは <input> + <label> の隣接ペアでチェックボックスを描画
+      tr.innerHTML = `<td><input type="checkbox" id="${cbId}" data-series="${escHtml(s)}"><label for="${cbId}"></label></td><td>${escHtml(s)}</td><td>${count}</td>`;
       tbody.appendChild(tr);
-    }
+    });
     tbody.querySelectorAll('tr').forEach(tr => {
       tr.addEventListener('click', (e) => {
         const cb = tr.querySelector('input[type=checkbox]');
         if (!cb) return;
-        if (e.target !== cb) cb.checked = !cb.checked;
+        // checkbox自身 or 対応する<label>クリックはブラウザが既にトグル済み。
+        // それ以外(行の余白部分など)はここで手動トグル
+        const isCb = e.target === cb;
+        const isLbl = e.target.tagName === 'LABEL' && e.target.htmlFor === cb.id;
+        if (!isCb && !isLbl) cb.checked = !cb.checked;
         refreshMergePreview();
       });
     });
