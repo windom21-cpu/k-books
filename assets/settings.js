@@ -2,7 +2,7 @@ import {
   getPAT, setPAT, getNick, setNick, getPATSetAt,
   getNextInviteNum, setNextInviteNum, formatInviteNum,
   config, fetchData, commitMutation, normalize
-} from './core.js?v=2.4';
+} from './core.js?v=2.5';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);
@@ -59,7 +59,7 @@ $('qrShow').addEventListener('click', async () => {
   const num = parseInt($('nextInviteNum').value, 10) || 2;
   const nick = formatInviteNum(num);
   const base = location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html';
-  const url = `${base}#token=${encodeURIComponent(pat)}&nick=${encodeURIComponent(nick)}`;
+  const url = `${base}?token=${encodeURIComponent(pat)}&nick=${encodeURIComponent(nick)}`;
   $('qrUrl').textContent = url;
   $('qrAssignedNick').textContent = `この招待のニックネーム: ${nick}`;
   $('qrArea').style.display = 'block';

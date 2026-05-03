@@ -3,7 +3,7 @@ import {
   findDuplicate, parseVolume, getNick, setNick, guessSeriesFromTitle,
   attachCalendarPicker, findExistingSeries,
   startBarcodeScan, stopBarcodeScan
-} from './core.js?v=2.4';
+} from './core.js?v=2.5';
 
 const $ = id => document.getElementById(id);
 const fields = ['isbn','series','seriesYomi','volume','edition','title','author','publisher','coverUrl','addedBy','acquiredAt','note'];

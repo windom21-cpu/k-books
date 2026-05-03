@@ -3,7 +3,7 @@ import {
   findDuplicate, parseVolume, getNick, guessSeriesFromTitle,
   findExistingSeries,
   startBarcodeScan, stopBarcodeScan
-} from './core.js?v=2.4';
+} from './core.js?v=2.5';
 
 const $ = id => document.getElementById(id);
 const queue = [];

@@ -25,24 +25,34 @@ const NEXT_INVITE_KEY = 'kbooks_next_invite_num';
   }
 })();
 
-// QR招待URL(#token=...&nick=...)で来たときにPATとニックを取り込み、URLからは即除去
-(function bootstrapTokenFromHash() {
-  const h = location.hash;
-  const tm = h.match(/[#&]token=([^&]+)/);
+// QR招待URL(?token=...&nick=... または #token=...&nick=...)からPATとニックを取り込み、
+// URLからは即除去。フラグメントはAndroidの一部スキャナで落とされる事例があるため、
+// クエリ・フラグメント両対応にしている。
+(function bootstrapTokenFromUrl() {
+  const h = location.hash || '';
+  const q = location.search || '';
+  const find = (str, name) => str.match(new RegExp('[?#&]' + name + '=([^&]+)'));
+
+  const tm = find(q, 'token') || find(h, 'token');
   if (!tm) return;
-  const token = decodeURIComponent(tm[1]);
+
+  let token = '';
+  try { token = decodeURIComponent(tm[1]); } catch (e) { console.error('[k-books] token decode failed', e); return; }
+  if (!token) return;
+
   localStorage.setItem(PAT_KEY, token);
   localStorage.setItem(PAT_DATE_KEY, new Date().toISOString().slice(0, 10));
 
   let receivedNick = '';
-  const nm = h.match(/[#&]nick=([^&]+)/);
+  const nm = find(q, 'nick') || find(h, 'nick');
   if (nm) {
-    receivedNick = decodeURIComponent(nm[1]);
+    try { receivedNick = decodeURIComponent(nm[1]); } catch (e) {}
     if (receivedNick) localStorage.setItem(NICK_KEY, receivedNick);
   }
 
-  const stripped = h.replace(/[#&](token|nick)=[^&]+/g, '').replace(/[#&]$/, '');
-  history.replaceState(null, '', location.pathname + location.search + stripped);
+  console.log('[k-books] PAT received via URL (nick:', receivedNick || '(none)', ')');
+  // クエリ・フラグメントごと丸ごと消す(URLにPATが残らないようにする)
+  history.replaceState(null, '', location.pathname);
 
   window.addEventListener('DOMContentLoaded', () => {
     const t = document.createElement('div');
