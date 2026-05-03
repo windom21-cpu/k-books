@@ -2,7 +2,7 @@ import {
   getPAT, setPAT, getNick, setNick, getPATSetAt,
   getNextInviteNum, setNextInviteNum, formatInviteNum,
   config, fetchData, commitMutation, normalize
-} from './core.js?v=2.2';
+} from './core.js?v=2.3';
 import QRCode from 'https://esm.sh/qrcode@1.5.3';
 
 const $ = id => document.getElementById(id);

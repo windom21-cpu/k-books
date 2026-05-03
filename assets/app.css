@@ -172,11 +172,60 @@ table th {
   box-shadow: none;
 }
 
-@media (max-width: 480px) {
-  .field-row label { display: block; width: auto; }
-  .field-row input[type="text"],
-  .field-row input[type="number"],
+/* スマホ・タブレット縦向け: ラベルを上、入力を下、行ごと整えてガタつき抑制 */
+@media (max-width: 600px) {
+  body {
+    padding: 6px;
+  }
+
+  .field-row {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  /* ラベルは独立行に */
+  .field-row > label {
+    flex: 1 0 100%;
+    width: auto;
+    margin-bottom: 2px;
+  }
+  /* ラベル直後の要素は行頭なので左マージン消す */
+  .field-row > label + * {
+    margin-left: 0;
+  }
+  /* テキスト系は伸びる、numberは元の幅尊重 */
+  .field-row > input[type="text"],
+  .field-row > input[type="email"],
+  .field-row > input[type="password"],
+  .field-row > input[type="search"],
+  .field-row > input[type="tel"],
+  .field-row > input[type="url"],
+  .field-row > textarea,
+  .field-row > select {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+  }
+  /* iOSの自動ズーム回避と可読性確保のため入力フォントは16pxに */
+  .field-row input,
   .field-row textarea,
-  .field-row select { width: 100%; max-width: none; }
-  .menu-buttons button { width: 45%; }
+  .field-row select {
+    font-size: 16px;
+  }
+
+  .menu-buttons button {
+    width: 45%;
+    height: 70px;
+    font-size: 14px;
+  }
+
+  /* 表セルは横幅を圧縮 */
+  table { font-size: 12px; }
+  table th, table td { padding: 1px 4px; }
+
+  /* タップ領域の確保 */
+  .date-pick-wrap > button {
+    min-width: 40px;
+    min-height: 28px;
+  }
 }
