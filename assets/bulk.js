@@ -2,7 +2,7 @@ import {
   uuid, lookupISBN, commitMutation, fetchData,
   findDuplicate, parseVolume, getNick, guessSeriesFromTitle,
   findExistingSeries
-} from './core.js?v=1.8';
+} from './core.js?v=1.9';
 
 const $ = id => document.getElementById(id);
 const queue = [];
@@ -13,7 +13,20 @@ let existing = { items: [] };
   $('saveStatus').textContent = '既存蔵書を読み込み中...';
   existing = await fetchData();
   $('saveStatus').textContent = `既存蔵書: ${existing.items.length}冊(重複検出に使用)`;
+  populateSeriesDatalist();
 })();
+
+function populateSeriesDatalist() {
+  const dl = document.getElementById('bulkSeriesList');
+  if (!dl) return;
+  dl.innerHTML = '';
+  const set = new Set(existing.items.map(i => i.series).filter(Boolean));
+  [...set].sort((a,b) => a.localeCompare(b, 'ja')).forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    dl.appendChild(opt);
+  });
+}
 
 function beep() {
   try {
@@ -43,6 +56,24 @@ function statusHtml(q) {
   }
 }
 
+// 単行の状態判定(編集後・取得後で共通利用)
+function validateEntry(entry) {
+  const b = entry.book || {};
+  const series = b.series || '';
+  const vol = b.volume;
+  if (!series || vol == null) {
+    entry.status = 'error';
+    entry.err = !series ? 'シリーズ名未入力' : '巻数未入力';
+    return;
+  }
+  entry.err = '';
+  if (findDuplicate(existing.items, { series, volume: vol, edition: b.edition || '', isbn: entry.isbn })) {
+    entry.status = 'duplicate';
+  } else {
+    entry.status = 'ok';
+  }
+}
+
 function render() {
   $('count').textContent = queue.length;
   const okCount = queue.filter(q => q.status === 'ok' || q.status === 'duplicate').length;
@@ -65,7 +96,10 @@ function render() {
       <td>${b.volume ?? ''}</td>
       <td>${esc(b.title || '')}</td>
       <td>${statusHtml(q)}</td>
-      <td><button data-i="${i}" class="delBtn">×</button></td>
+      <td>
+        <button data-i="${i}" class="editBtn">編集</button>
+        <button data-i="${i}" class="delBtn">×</button>
+      </td>
     </tr>`;
   });
   html += '</tbody></table>';
@@ -76,7 +110,57 @@ function render() {
       render();
     });
   }
+  for (const b of $('queueWrap').querySelectorAll('.editBtn')) {
+    b.addEventListener('click', () => openBulkEdit(Number(b.dataset.i)));
+  }
 }
+
+let editingIdx = -1;
+
+function openBulkEdit(idx) {
+  const q = queue[idx];
+  if (!q) return;
+  editingIdx = idx;
+  const b = q.book || {};
+  $('ed_isbn').value = q.isbn || '';
+  $('ed_series').value = b.series || '';
+  $('ed_volume').value = b.volume ?? '';
+  $('ed_edition').value = b.edition || '';
+  $('ed_title').value = b.title || '';
+  $('ed_author').value = b.author || '';
+  $('ed_publisher').value = b.publisher || '';
+  $('editPane').style.display = 'block';
+  $('editPane').scrollIntoView({ behavior: 'smooth' });
+}
+
+$('ed_apply').addEventListener('click', () => {
+  if (editingIdx < 0) return;
+  const q = queue[editingIdx];
+  if (!q) { editingIdx = -1; $('editPane').style.display = 'none'; return; }
+  const seriesIn = $('ed_series').value.trim();
+  const series = findExistingSeries(existing.items, seriesIn) || seriesIn;
+  const newIsbn = $('ed_isbn').value.trim() || q.isbn;
+  q.isbn = newIsbn;
+  q.book = {
+    ...(q.book || {}),
+    series,
+    volume: parseVolume($('ed_volume').value),
+    edition: $('ed_edition').value,
+    title: $('ed_title').value.trim(),
+    author: $('ed_author').value.trim(),
+    publisher: $('ed_publisher').value.trim(),
+    isbn: newIsbn
+  };
+  validateEntry(q);
+  $('editPane').style.display = 'none';
+  editingIdx = -1;
+  render();
+});
+
+$('ed_cancel').addEventListener('click', () => {
+  $('editPane').style.display = 'none';
+  editingIdx = -1;
+});
 
 async function handleScan(isbn) {
   if (queue.some(q => q.isbn === isbn)) {
@@ -91,15 +175,15 @@ async function handleScan(isbn) {
 
   const r = await lookupISBN(isbn);
   if (!r) {
+    entry.book = { series: '', volume: null, edition: '', title: '', author: '', publisher: '', isbn };
     entry.status = 'error';
-    entry.err = '書誌取得失敗';
+    entry.err = '書誌取得失敗(編集ボタンから手入力で補えます)';
     render();
     return;
   }
 
   const vol = parseVolume(r.volume) ?? parseVolume(r.title);
   let series = guessSeriesFromTitle(r.title) || r.series || '';
-  // 既存蔵書に同名(正規化後同じ)があれば既存の表記に寄せる
   const canonical = findExistingSeries(existing.items, series);
   if (canonical) series = canonical;
   entry.book = {
@@ -110,21 +194,10 @@ async function handleScan(isbn) {
     publisher: r.publisher || '',
     isbn: r.isbn || isbn,
     coverUrl: r.coverUrl || '',
-    volume: vol
+    volume: vol,
+    edition: ''
   };
-
-  if (!series || vol == null) {
-    entry.status = 'error';
-    entry.err = !series ? 'シリーズ名取得失敗' : '巻数取得失敗';
-    render();
-    return;
-  }
-
-  if (findDuplicate(existing.items, { series, volume: vol, edition: '' })) {
-    entry.status = 'duplicate';
-  } else {
-    entry.status = 'ok';
-  }
+  validateEntry(entry);
   render();
 }
 
@@ -198,7 +271,7 @@ $('saveAll').addEventListener('click', async () => {
     series: q.book.series,
     seriesYomi: q.book.seriesYomi || '',
     volume: q.book.volume,
-    edition: '',
+    edition: q.book.edition || '',
     title: q.book.title || '',
     author: q.book.author || '',
     publisher: q.book.publisher || '',

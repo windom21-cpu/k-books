@@ -10,9 +10,9 @@
 <link rel="icon" href="./favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./assets/98.css?v=1.8">
-<link rel="stylesheet" href="./assets/app.css?v=1.8">
-<script src="./assets/config.js?v=1.8"></script>
+<link rel="stylesheet" href="./assets/98.css?v=1.9">
+<link rel="stylesheet" href="./assets/app.css?v=1.9">
+<script src="./assets/config.js?v=1.9"></script>
 <script src="https://unpkg.com/html5-qrcode" defer></script>
 </head>
 <body>
@@ -38,6 +38,7 @@
 
     <fieldset style="margin-top:12px;">
       <legend>スキャン済み (<span id="count">0</span>件)</legend>
+      <p class="muted">「編集」で行ごとに修正可。エラー行も足りない情報を補えば登録対象になります。</p>
       <div id="queueWrap"><p class="muted">まだ何もスキャンされていません。</p></div>
       <div class="button-row" style="margin-top:8px;">
         <button id="saveAll" disabled>全件登録</button>
@@ -47,9 +48,35 @@
       <div id="saveStatus" style="margin-top:8px;"></div>
     </fieldset>
 
+    <fieldset id="editPane" style="display:none; margin-top:12px;">
+      <legend>行の編集</legend>
+      <div class="field-row"><label>ISBN</label><input type="text" id="ed_isbn"></div>
+      <div class="field-row"><label>シリーズ名 *</label>
+        <input type="text" id="ed_series" list="bulkSeriesList" autocomplete="off"></div>
+      <datalist id="bulkSeriesList"></datalist>
+      <div class="field-row"><label>巻数 *</label><input type="number" id="ed_volume" min="0"></div>
+      <div class="field-row"><label>版</label>
+        <select id="ed_edition">
+          <option value="">通常</option>
+          <option value="新装">新装</option>
+          <option value="愛蔵">愛蔵</option>
+          <option value="完全">完全</option>
+          <option value="文庫">文庫</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="field-row"><label>タイトル</label><input type="text" id="ed_title"></div>
+      <div class="field-row"><label>著者</label><input type="text" id="ed_author"></div>
+      <div class="field-row"><label>出版社</label><input type="text" id="ed_publisher"></div>
+      <div class="button-row">
+        <button id="ed_apply">確定</button>
+        <button id="ed_cancel" type="button">閉じる</button>
+      </div>
+    </fieldset>
+
   </div>
 </div>
 
-<script type="module" src="./assets/bulk.js?v=1.8"></script>
+<script type="module" src="./assets/bulk.js?v=1.9"></script>
 </body>
 </html>
