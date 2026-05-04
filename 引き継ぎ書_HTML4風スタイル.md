@@ -37,6 +37,9 @@
     color: #222222;
     font-family: "MS UI Gothic", "ＭＳ ＵＩ Ｇｏｔｈｉｃ", "MSUIGothic",
                  "Hiragino Kaku Gothic ProN", sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
   }
   h1, h2, h3, h4, p, td, th, li, small, b, i, tt, code, kbd, samp {
     font-family: "MS UI Gothic", "ＭＳ ＵＩ Ｇｏｔｈｉｃ", "MSUIGothic",
@@ -50,13 +53,12 @@
 </head>
 <body>
 <a name="top"></a>
-<center>
 
 <br>
-<h1>★ ページタイトル ★</h1>
-<p>このページについて1〜2行のリード文。</p>
+<h1 align="center">★ ページタイトル ★</h1>
+<p align="center">このページについて1〜2行のリード文。</p>
 
-<p>
+<p align="center">
 [ <a href="#sec1">セクション1</a> ]
 &nbsp;[ <a href="#sec2">セクション2</a> ]
 </p>
@@ -64,7 +66,10 @@
 <hr width="80%">
 
 <a name="sec1"></a>
-<h2>★ セクション1 ★ サブタイトル</h2>
+<h2 align="center">★ セクション1 ★<br>サブタイトル</h2>
+
+<p>本文の説明段落は <code>align</code> を付けず左揃えのまま。<br>
+こうすると <br> 改行が綺麗に左に揃います。</p>
 
 <table border="1" cellpadding="8" align="center" width="90%">
   <tr><th width="30%">項目</th><th>値</th></tr>
@@ -74,14 +79,13 @@
 <br>
 <hr width="80%">
 
-<p>
+<p align="center">
 [ <a href="#top">▲ ページ先頭へ</a> ]
 &nbsp;[ <a href="./index.html">トップへ戻る</a> ]
 </p>
 
-<p><small>&copy; サイト名 &middot; <a href="https://github.com/...">source</a></small></p>
+<p align="center"><small>&copy; サイト名 &middot; <a href="https://github.com/...">source</a></small></p>
 
-</center>
 </body>
 </html>
 ```
@@ -92,9 +96,13 @@
 
 ## 3. 構成パーツの使い方
 
-### 3.1 中央寄せ
-- 全体を `<center>...</center>` で囲む(廃止予定タグだが現行ブラウザは全て対応・印刷も安定)
-- CSSで `margin: 0 auto` をやらないのは、`<table align="center">` と組合せた時の挙動が `<center>` 配下の方が予測しやすいため
+### 3.1 中央寄せ(初手で間違えやすいポイント)
+- **NG**: `<center>...</center>` で全体を包む
+  - 一見手早くキレイに見えるが、`<br>` を含む説明段落の各行が個別にセンタリングされて読みにくくなる(段落の左端が揃わずジグザグになる)
+- **推奨**: `body { max-width: 900px; margin: 0 auto; padding: 16px; }` で**ブロックとして中央寄せ**し、テキストは左揃えのまま
+- 中央配置したい個別要素(タイトル h1/h2、ナビ、フッター)には `align="center"` 属性を直接付ける
+- テーブルは元から `<table align="center">` で個別に中央寄せしているので body 側の影響を受けない
+- この変更は setup.html で実体験あり: 全体 `<center>` だと「PWA で使う場合の注意」のような複数行段落がジグザグして読み流せなかった
 
 ### 3.2 テーブル
 ```html
@@ -109,9 +117,14 @@
 - セクション見出し行は `<tr><td colspan="2" align="center"><b>― 見出し ―</b></td></tr>` で挿入
 
 ### 3.3 見出し
-- `<h1>★ タイトル ★</h1>` / `<h2>★ サブタイトル ★</h2>` の星囲み
+- `<h1 align="center">★ タイトル ★</h1>` / `<h2 align="center">★ サブタイトル ★</h2>` の星囲み
 - 星の代わりに `■` `◆` `≪≫` でも可。サイト全体で1種類に統一する
 - font-size は h1=32px / h2=26px が目安(後述のフォント問題対策で `font-weight: normal` 必須)
+- **長いサブタイトル付きの見出しは `<br>` で2行に分ける**:
+  ```html
+  <h2 align="center">★ STEP 1 ★<br>fine-grained PAT を発行</h2>
+  ```
+  ステップ番号と内容を視覚的に分離でき、スマホで折返したときの見た目も安定する
 
 ### 3.4 区切り
 - セクション間は `<hr width="80%">` 一択
@@ -126,6 +139,12 @@
 ---
 
 ## 4. ハマりどころ(全部踏んだ)
+
+### 4.0 全体 `<center>` で `<br>` 段落がジグザグになる(初手で踏んだ)
+- 全体を `<center>...</center>` で囲むと、`text-align: center` が継承されて段落内の各 `<br>` 区切りで個別に中央揃えになる
+- 結果、左端が揃わずジグザグになり、複数行の説明が読み流せない
+- **対策**: 3.1 で書いた通り、body の `max-width` + `margin: 0 auto` で**ブロック中央寄せ**にして、テキストは左揃えのまま。中央配置したい個別要素にだけ `align="center"` を付ける
+- 補足: `body` に `p { text-align: left; }` の CSS ルールを足すと `<p align="center">` が効かなくなる(CSS のセレクタ特異度が `align` 属性のヒントより強い)。CSS では一律指定せず、属性側に任せる方が事故が少ない
 
 ### 4.1 `<tt>` / `<code>` がブラウザ既定で等幅フォント
 - 何もしないと `<tt>k-books-write</tt>` だけ Liberation Mono 等になり浮く
@@ -148,8 +167,8 @@
 - コントラストを取るなら `#0000ee` / `#551a8b` (古典的Mosaic色) でも可
 
 ### 4.5 印刷対応
-- `<center>` + `width="90%"` の組合せで A4印刷もそのまま読める
-- 余白は body に `margin: 0` を入れるとプリンタの不可印刷領域とぶつかるので**触らない**
+- body `max-width: 900px` + テーブル `width="90%"` の組合せで A4印刷もそのまま読める
+- 余白は body の `padding` で確保。`margin: 0` にするとプリンタの不可印刷領域とぶつかる
 - 黒背景・反転表示はトナー食いするので絶対NG。`background: #ffffff` 固定
 
 ### 4.6 キャッシュ対策
@@ -174,7 +193,8 @@
 | `<marquee>` `<blink>` | ブラウザ非対応。レトロ感を出したいなら `★` の数を増やす方向で |
 | 画像で見出しを作る | 検索性ゼロ。テキストのまま |
 | CSSで `border-style: double` | 太い・滲む。`border="1"` 単線が一番素直 |
-| `<center>` の代わりに `text-align: center` を CSS で当てる | テーブル `align="center"` との相性で崩れることがある。素直に `<center>` 推奨 |
+| 全体を `<center>...</center>` で囲む | 段落の `<br>` 改行が個別に中央揃えされてジグザグになる。`body { max-width; margin: 0 auto }` でブロック中央寄せにして、要素単位で `align="center"` を付ける方式が正解 |
+| `p { text-align: left; }` を CSS に書く | `<p align="center">` が効かなくなる(CSS の方が優先される)。属性側に任せて CSS は触らない |
 
 ---
 
@@ -184,9 +204,13 @@
 - [ ] charset=UTF-8 を `<head>` 先頭付近に
 - [ ] `<meta name="viewport">` でモバイル幅対応
 - [ ] フォント・リンク色・h1/h2 サイズの CSS が入っている
+- [ ] body に `max-width: 900px; margin: 0 auto; padding: 16px;` で**ブロック中央寄せ**(`<center>` 全体包みは禁止)
+- [ ] 中央配置したい要素(h1/h2/ナビ/フッター)に `align="center"` 属性を個別付与
 - [ ] 全テーブルが `border="1" cellpadding="8" align="center" width="90%"`
+- [ ] 長い見出しは `★ STEP 1 ★<br>サブタイトル` のように2行に分けた
 - [ ] ヘッダーに目次、フッターに「▲ ページ先頭へ」
 - [ ] 主要セクションに `<a name="...">` アンカー
+- [ ] 説明段落の `<br>` 改行が**左揃えで自然に流れる**ことを確認した(全体センタリング再発防止)
 - [ ] スマホ実機で開いて崩れない
 - [ ] A4印刷プレビューで切れない
 - [ ] `★` が和文フォントで描画されている(浮いていない)
